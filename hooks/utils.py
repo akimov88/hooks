@@ -6,9 +6,9 @@ import time
 from rest_framework.exceptions import ValidationError
 
 
-def send_data(data: dict, attempt: int = 5):
+def send_data(data: dict, attempt: int = 5) -> dict:
     try:
-        time.sleep(random.randint(0, 1))
+        time.sleep(random.random())
         result = random.randint(0, 50)
         hash_data = hashlib.md5(json.dumps(data).encode('utf-8')).hexdigest()
         if result <= 10:
