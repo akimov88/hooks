@@ -64,7 +64,7 @@ class WebhookViewSet(RetrieveModelMixin, CreateModelMixin, ListModelMixin,
         return Response({'task_id': task.id}, status=status.HTTP_200_OK)
 
 
-class TaskResultAPIView(RetrieveModelMixin, GenericViewSet):
+class TaskResultViewSet(RetrieveModelMixin, GenericViewSet):
     queryset = TaskResult.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
