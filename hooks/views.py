@@ -70,4 +70,3 @@ class TaskResultAPIView(RetrieveModelMixin, GenericViewSet):
     def retrieve(self, request, *args, **kwargs):
         task_result = self.queryset.get(task_id=kwargs.get('task_id'))
         return Response({'result': task_result.result})
-

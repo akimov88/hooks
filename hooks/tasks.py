@@ -36,9 +36,7 @@ def delete_hook_task(payload: dict) -> str:
 @app.task
 def hook_lifetime_task():
     hook_lifetime = timedelta(hours=4)
-    last_hour_hooks = Webhook.objects.filter(
-        created__gte=timezone.now() - timedelta(hours=4),
-    )
+    last_hour_hooks = Webhook.objects.filter(created__gte=timezone.now() - timedelta(hours=4))
     for hook in last_hour_hooks:
         if timezone.now() - hook.created > hook_lifetime:
             hook.delete()
