@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django_celery_results.models import TaskResult
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, UpdateModelMixin, \
@@ -61,3 +62,12 @@ class WebhookViewSet(RetrieveModelMixin, CreateModelMixin, ListModelMixin,
             'data': serializer.data,
         })
         return Response({'task_id': task.id}, status=status.HTTP_200_OK)
+
+
+class TaskResultAPIView(RetrieveModelMixin, GenericViewSet):
+    queryset = TaskResult.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        task_result = self.queryset.get(task_id=kwargs.get('task_id'))
+        return Response({'result': task_result.result})
+

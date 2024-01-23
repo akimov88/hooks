@@ -1,5 +1,6 @@
-from hooks.models import Webhook
 from rest_framework.serializers import ModelSerializer, HiddenField
+
+from hooks.models import Webhook
 
 
 class CurrentUserIdDefault:
@@ -10,8 +11,6 @@ class CurrentUserIdDefault:
 
 
 class WebhookDefaultSerializer(ModelSerializer):
-    user_id = HiddenField(default=CurrentUserIdDefault())
-
     class Meta:
         model = Webhook
         fields = '__all__'
