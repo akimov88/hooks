@@ -3,11 +3,11 @@ from rest_framework.serializers import ModelSerializer, HiddenField
 from hooks.models import Webhook
 
 
-class CurrentUserIdDefault:
+class CurrentUserDefault:
     requires_context = True
 
     def __call__(self, serializer_field):
-        return serializer_field.context['request'].user.id
+        return serializer_field.context['request'].user
 
 
 class WebhookDefaultSerializer(ModelSerializer):
@@ -17,7 +17,7 @@ class WebhookDefaultSerializer(ModelSerializer):
 
 
 class WebhookCreateSerializer(ModelSerializer):
-    user_id = HiddenField(default=CurrentUserIdDefault())
+    user = HiddenField(default=CurrentUserDefault())
 
     class Meta:
         model = Webhook

@@ -13,6 +13,8 @@ celery = "^5.3.6"
 django-celery-beat = "^2.5.0"
 django-celery-results = "^2.5.1"
 redis = "^5.0.1"
+psycopg2 = "^2.9.9"
+python-keycloak = "^3.7.0"
 
 
 [build-system]
