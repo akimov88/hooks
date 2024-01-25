@@ -1,21 +1,12 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth import login
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
-from django.contrib.auth import get_user_model
-from django.contrib.auth import login
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from core.utils import get_client
 
 User = get_user_model()
-
-
-class KeycloakCallbackAPIView(APIView):
-
-    def get(self, request, *args, **kwargs):
-        code = request.GET.get('code')
-        return Response({'code': code})
 
 
 class KeycloakLoginView(View):

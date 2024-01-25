@@ -1,9 +1,5 @@
 version: "3.9"
 
-volumes:
-  postgres_data:
-    driver: local
-
 services:
   app:
     environment:
@@ -16,7 +12,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - celery
+      - redis
 
   db:
     image: postgres
@@ -42,6 +38,16 @@ services:
     ports:
       - "5555:5555"
     depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A core beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
       - redis
 
   keycloak:
@@ -59,3 +65,7 @@ services:
       - "8080:8080"
     depends_on:
       - db
+
+volumes:
+  postgres_data:
+    driver: local

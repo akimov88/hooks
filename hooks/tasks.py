@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from core.celery import app
 from hooks.models import Webhook
+from hooks.utils import send_data
 
 
 @app.task
