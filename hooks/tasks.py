@@ -25,7 +25,7 @@ def create_hook_task(payload: dict) -> str:
 @app.task
 def write_webhook_data_task(payload: dict) -> str:
     try:
-        webhook_data = WebhookData.objects.get(id=payload.get('id'))
+        webhook_data = WebhookData.objects.get(id=payload.get('webhook_id'))
         webhook_data.data = payload.get('data')
         webhook_data.save()
         return f'WebhookData {webhook_data.id} updated'

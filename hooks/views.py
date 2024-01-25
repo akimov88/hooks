@@ -7,9 +7,9 @@ from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListMode
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from hooks.models import Webhook
-from hooks.serializers import WebhookSerializer
-from hooks.tasks import create_hook_task
+from hooks.models import Webhook, WebhookData
+from hooks.serializers import WebhookSerializer, WebhookDataSerializer
+from hooks.tasks import create_hook_task, write_webhook_data_task
 
 
 class WebhookViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
@@ -40,7 +40,18 @@ class WebhookViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, Destr
 
 
 class WebhookDataViewSet(UpdateModelMixin, GenericViewSet):
-    pass
+    queryset = WebhookData.objects.all()
+    serializer_class = WebhookDataSerializer
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        print({'request.data': self.request.data,
+               'args': self.args,
+               'kwargs': self.kwargs})
+        task = write_webhook_data_task.delay(payload={'webhook_id': kwargs.get('pk'),
+                                                      'data': request.data.get('data')})
+        return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
 
 
 class TaskResultViewSet(RetrieveModelMixin, GenericViewSet):
