@@ -46,9 +46,6 @@ class WebhookDataViewSet(UpdateModelMixin, GenericViewSet):
     def update(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print({'request.data': self.request.data,
-               'args': self.args,
-               'kwargs': self.kwargs})
         task = write_webhook_data_task.delay(payload={'webhook_id': kwargs.get('pk'),
                                                       'data': request.data.get('data')})
         return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
