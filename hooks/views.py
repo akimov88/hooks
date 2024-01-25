@@ -32,7 +32,7 @@ class WebhookViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, Destr
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        task = create_hook_task.delay({'user_id': request.user.id})
+        task = create_hook_task.delay(payload={'user_id': request.user.id})
         return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
@@ -50,4 +50,5 @@ class TaskResultViewSet(RetrieveModelMixin, GenericViewSet):
             'id': task_result.id,
             'state': task_result.state,
             'status': task_result.status,
+            'result': task_result.result if not TypeError else task_result.result.__str__(),
         })

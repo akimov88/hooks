@@ -15,5 +15,5 @@ class WebhookSerializer(ModelSerializer):
 
     class Meta:
         model = Webhook
-        fields = ('created', 'user', 'user_id', 'data')
+        fields = ('id', 'data', 'user_id', 'user', 'created')
         read_only_fields = ('user',)

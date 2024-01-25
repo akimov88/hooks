@@ -15,21 +15,21 @@ from hooks.models import Webhook, WebhookData
 User = get_user_model()
 
 
-@app.task(bind=True)
+@app.task
 def create_hook_task(payload: dict) -> str:
     hook = Webhook.objects.create(user=User(payload.get('user_id')))
     WebhookData.objects.create(webhook=hook, data=None)
     return f'Webhook {hook.id} created'
 
 
-@app.task(bind=True)
+@app.task
 def write_webhook_data_task(payload: dict) -> str:
     try:
         webhook_data = WebhookData.objects.get(id=payload.get('id'))
         webhook_data.data = payload.get('data')
         webhook_data.save()
         return f'WebhookData {webhook_data.id} updated'
-    except WebhookData.DoesNotExist as error:
+    except WebhookData.DoesNotExist:
         return f'WebhookData {payload.get("id")} does not exists'
 
 
