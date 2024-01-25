@@ -5,38 +5,26 @@ from datetime import timedelta
 from django.utils import timezone
 
 from core.celery import app
-from hooks.models import Webhook
-from hooks.utils import send_data
+from hooks.models import Webhook, WebhookData
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 @app.task
 def create_hook_task(payload: dict) -> str:
-    time.sleep(random.randint(0, 2))
-    hook = Webhook.objects.create(user_id=payload.get('user_id'), data=payload.get('data'))
-    return f'webhook id: {hook.id} created'
+    hook = Webhook.objects.create(user=User(payload.get('user_id')))
+    WebhookData.objects.create(webhook=hook, data=None)
+    return f'Webhook id: {hook.id} created'
 
 
 @app.task
-def update_hook_data_task(payload: dict) -> str:
-    try:
-        time.sleep(random.randint(0, 2))
-        hook = Webhook.objects.get(id=payload.get('id'))
-        hook.data = payload.get('data')
-        hook.save()
-        return f'webhook id: {hook.id} updated'
-    except Webhook.DoesNotExist as error:
-        return f'Webhook {payload.get("id")} does not exists:\n\n{error}'
-
-
-@app.task
-def delete_hook_task(payload: dict) -> str:
-    try:
-        time.sleep(random.randint(0, 2))
-        hook = Webhook.objects.get(id=payload.get('id'))
-        hook.delete()
-        return f'webhook id: {payload.get("id")} deleted'
-    except Webhook.DoesNotExist as error:
-        return f'Webhook {payload.get("id")} does not exists:\n\n{error}'
+def write_webhook_data_task(payload: dict) -> str:
+    webhook_data = Webhook.objects.get(id=payload.get('id'))
+    webhook_data.data = payload.get('data')
+    webhook_data.save()
+    return f'WebhookData id: {webhook_data.id} updated'
 
 
 @app.task

@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django_celery_results.models import TaskResult
+from celery.result import AsyncResult
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, UpdateModelMixin, \
@@ -8,23 +8,18 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from hooks.models import Webhook
-from hooks.serializers import WebhookCreateSerializer, WebhookDefaultSerializer
-from hooks.tasks import create_hook_task, update_hook_data_task, delete_hook_task
+from hooks.serializers import WebhookSerializer
+from hooks.tasks import create_hook_task
 
 
-class WebhookViewSet(RetrieveModelMixin, CreateModelMixin, ListModelMixin,
-                     UpdateModelMixin, DestroyModelMixin, GenericViewSet):
+class WebhookViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
     queryset = Webhook.objects.all()
+    serializer_class = WebhookSerializer
 
     def get_queryset(self):
         if self.request.user.id == 1:
             return Webhook.objects.all()
         return Webhook.objects.filter(user_id=self.request.user.id)
-
-    def get_serializer_class(self):
-        if self.action in ('retrieve', 'list', 'update', 'destroy'):
-            return WebhookDefaultSerializer
-        return WebhookCreateSerializer
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -37,34 +32,22 @@ class WebhookViewSet(RetrieveModelMixin, CreateModelMixin, ListModelMixin,
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        task = create_hook_task.delay({
-            'user_id': request.user.id,
-            'data': serializer.data,
-        })
+        task = create_hook_task.delay({'user_id': request.user.id})
         return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
 
-    def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        task = update_hook_data_task.delay({
-            'id': kwargs.get('pk'),
-            'data': serializer.data,
-        })
-        return Response({'task_id': task.id}, status=status.HTTP_200_OK)
+    def destroy(self, request, *args, **kwargs):
+        pass
 
-    def delete(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        task = delete_hook_task({
-            'id': kwargs.get('pk'),
-            'data': serializer.data,
-        })
-        return Response({'task_id': task.id}, status=status.HTTP_200_OK)
+
+class WebhookDataViewSet(UpdateModelMixin, GenericViewSet):
+    pass
 
 
 class TaskResultViewSet(RetrieveModelMixin, GenericViewSet):
-    queryset = TaskResult.objects.all()
-
     def retrieve(self, request, *args, **kwargs):
-        task_result = self.queryset.get(task_id=kwargs.get('task_id'))
-        return Response({'result': task_result.result})
+        task_result = AsyncResult(id=kwargs.get('task_id'))
+        return Response({
+            'id': task_result.id,
+            'state': task_result.state,
+            'status': task_result.status,
+        })

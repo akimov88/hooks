@@ -1,18 +1,18 @@
 version: "3.9"
 
 services:
-  app:
-    environment:
-      DJANGO_SETTINGS_MODULE: core.settings
-    command: "python manage.py runserver 0.0.0.0:8000"
-    build: .
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
+#  app:
+#    environment:
+#      DJANGO_SETTINGS_MODULE: core.settings
+#    command: "python manage.py runserver 0.0.0.0:8000"
+#    build: .
+#    volumes:
+#      - .:/app
+#    ports:
+#      - "8000:8000"
+#    depends_on:
+#      - db
+#      - redis
 
   db:
     image: postgres
@@ -30,41 +30,41 @@ services:
     ports:
       - "6379:6379"
 
-  celery:
-    build: .
-    command: sh -c "celery --app=core worker --pool=solo --loglevel=INFO"
-    volumes:
-      - .:/app
-    ports:
-      - "5555:5555"
-    depends_on:
-      - db
-      - redis
+#  celery:
+#    build: .
+#    command: sh -c "celery --app=core worker --pool=solo --loglevel=INFO"
+#    volumes:
+#      - .:/app
+#    ports:
+#      - "5555:5555"
+#    depends_on:
+#      - db
+#      - redis
+#
+#  celery-beat:
+#    build: .
+#    command: celery -A core beat --loglevel=info
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      - db
+#      - redis
 
-  celery-beat:
-    build: .
-    command: celery -A core beat --loglevel=info
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-      - redis
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:legacy
-    environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: db
-      DB_DATABASE: postgres
-      DB_USER: postgres
-      DB_SCHEMA: public
-      DB_PASSWORD: postgres
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:legacy
+#    environment:
+#      DB_VENDOR: POSTGRES
+#      DB_ADDR: db
+#      DB_DATABASE: postgres
+#      DB_USER: postgres
+#      DB_SCHEMA: public
+#      DB_PASSWORD: postgres
+#      KEYCLOAK_USER: admin
+#      KEYCLOAK_PASSWORD: admin
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - db
 
 volumes:
   postgres_data:
