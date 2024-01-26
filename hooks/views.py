@@ -35,8 +35,8 @@ class WebhookViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, Destr
         task = create_hook_task.delay(payload={'user_id': request.user.id})
         return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, *args, **kwargs):
-        pass
+    # def destroy(self, request, *args, **kwargs):
+    #     pass
 
 
 class WebhookDataViewSet(UpdateModelMixin, GenericViewSet):
