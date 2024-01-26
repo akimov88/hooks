@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from hooks.models import Webhook, WebhookData
-from hooks.views import WebhookViewSet, WebhookDataViewSet
+from hooks.views import WebhookViewSet, WebhookDataViewSet, TaskResultViewSet
 
 User = get_user_model()
 db_tests = {
@@ -25,6 +25,12 @@ class AbstractTestCase(TestCase):
 
 
 class WebhookTestCase(AbstractTestCase):
+    def test_retrieve(self):
+        request = self.factory.get(path='/webhook/<int:pk>', format='json')
+        force_authenticate(request=request, user=self.user)
+        response = WebhookViewSet.as_view(actions={'get': 'retrieve'})(request, pk=self.hook.id)
+        self.assertEqual(response.status_code, 200)
+
     def test_list(self):
         request = self.factory.get(path='/webhook/list', format='json')
         force_authenticate(request=request, user=self.user)
@@ -48,3 +54,6 @@ class WebhookTestCase(AbstractTestCase):
         force_authenticate(request=request, user=self.user)
         response = WebhookViewSet.as_view(actions={'delete': 'destroy'})(request, pk=self.hook.id)
         self.assertEqual(response.status_code, 204)
+
+    def test_task_result(self):
+        pass
