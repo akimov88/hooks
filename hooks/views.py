@@ -35,20 +35,20 @@ class WebhookViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, Destr
         task = create_hook_task.delay(payload={'user_id': request.user.id})
         return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
 
-    # def destroy(self, request, *args, **kwargs):
-    #     pass
-
 
 class WebhookDataViewSet(UpdateModelMixin, GenericViewSet):
     queryset = WebhookData.objects.all()
     serializer_class = WebhookDataSerializer
 
     def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        task = write_webhook_data_task.delay(payload={'webhook_id': kwargs.get('pk'),
-                                                      'data': request.data.get('data')})
-        return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            task = write_webhook_data_task.delay(payload={'webhook_id': kwargs.get('pk'),
+                                                          'data': request.data.get('data')})
+            return Response({'task_id': task.id}, status=status.HTTP_201_CREATED)
+        except (WebhookData.DoesNotExist, Webhook.DoesNotExist) as error:
+            raise ValidationError(f'object_does_not_exists: {error}')
 
 
 class TaskResultViewSet(RetrieveModelMixin, GenericViewSet):
